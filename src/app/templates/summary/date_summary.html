@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Date Report</title>
+    <base href="../../" target="_blank">
+    <link rel="stylesheet" href="static/style/include/bootstrap.min.css" crossorigin="anonymous">
+</head>
+
+<body>
+    <div id="app">
+        <h1>Date {{ date_str }}</h1>
+
+        <br />
+        <h3>Part 1. Date Summary</h3>
+        <div v-html="render_date_summary()"></div>
+
+        <br />
+        <h3>Part 2. Visualization</h3>
+
+        <div id="time_range" style="width:100%; height:500px;"></div>
+        <!--<div id="tree_chart" style="width:100%; height:800px"></div>-->
+        <!--<div id="rank_curve" style="width:100%; height:500px"></div>-->
+
+        <br />
+        <h3>Part 3. Interval Details</h3>
+
+        <table class="table table-sm" style="width:80%; margin-left:10%; text-align:center">
+            <thead>
+            <tr>
+                <th scope="col">Interval ID</th>
+                <th scope="col">Type</th>
+                <th scope="col">Interval Start ~ Interval End</th>
+                <th scope="col">Interval Duration</th>
+                <th scope="col">Reported</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <!--<tr v-for="log in logs">
+                <td>{{ log.id }}</td>
+                <td>{{ categories[log.type_index] }}/{{ subtypes[log.subtype_index] }}</td>
+                <td>{{ new Date(log.start).toLocaleTimeString('en-US', { hour12: false }) }}
+                ~ {{ new Date(log.end).toLocaleTimeString('en-US', { hour12: false }) }}</td>
+                <td>{{ (log.end - log.start) | milliseconds_to_hms }}</td>
+                <th>{{ log.reported }}</th>
+            </tr>-->
+
+            </tbody>
+        </table>
+    </div>
+</body>
+
+<script src="static/script/include/echarts.min.js"></script>
+<script src="static/script/include/vue.min.js"></script>
+
+<script src="static/script/utils/req.js"></script>
+<script src="static/script/utils/api.js"></script>
+<script src="static/script/utils/utils.js"></script>
+
+<script src="static/script/chart/gantt_chart.js"></script>
+<!--<script src="static/script/chart/rank_curve.js"></script>-->
+<!--<script src="static/script/chart/tree_chart.js"></script>-->
+
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            date_str:     window.location.href.split('/').pop(),
+            types:        {},
+            logs:         {},
+            date_summary: ""
+        },
+        methods: {
+            render_date_summary: function(){
+                this.date_summary = synreq(DATE_SUMMARY_API(this.date_str));
+                console.log(this.date_summary);
+                return this.date_summary ? this.date_summary : "<p>No summary</p>";
+            },
+            draw_gantt: function(resp) {
+                let logs = Object.values(this.logs);
+                logs.forEach((log) => {
+                     log.comment = this.types[log.type].name_path;
+                });
+                range_start = new Date(this.date_str).setHours(0, 0, 0, 0);
+                range = {
+                    start: new Date(range_start),
+                    end:   new Date(range_start + 86400 * 1000)
+                };
+                console.log(range);
+                time_range_chart.setOption(option = generate_date_intervals_gantt_option(logs, this.types, range));
+                console.log(logs);
+            }
+        },
+        filters: {
+            milliseconds_to_hms: function(milliseconds){
+                seconds = milliseconds/1000;
+
+                let hour = Math.floor(seconds / 3600);
+                let minute = Math.floor(seconds % 3600 / 60);
+                let second = seconds % 60;
+
+                hour = leading_zero(hour.toString());
+                minute = leading_zero(minute.toString());
+                second = leading_zero(second.toString());
+
+                duration_string = `${hour}:${minute}:${second}`;
+                return duration_string;
+            }
+        },
+        created: function() {
+        },
+        mounted: function() {
+            time_range_chart = echarts.init(document.getElementById('time_range'));
+            // rank_curve       = echarts.init(document.getElementById('rank_curve'));
+            // tree_chart       = echarts.init(document.getElementById('tree_chart'));
+
+            pr_log_type = req(LOG_TYPE_API()).then(
+                (resp) => this.types = add_type_name_path(add_type_path(resp))
+            );
+            pr_log_date = req(LOG_DATE_API(this.date_str)).then(
+                (resp) => this.logs = resp
+            );
+            Promise.all([pr_log_type, pr_log_date]).then(this.draw_gantt);
+            tree_chart.setOption(option = get_tree_chart());
+        }
+    });
+
+    time_range_chart.on('click', function (params) {
+        console.log(params.data);
+    });
+
+</script>
+</html>
