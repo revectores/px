@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta, timezone
 
 from flask import Blueprint, render_template, send_from_directory, jsonify
 from app.model import LogType, Log, Summary
-from utils import models_to_dict, date_str2date_range
+from app.utils import models_to_dict, date_str2date_range
 from playhouse.shortcuts import dict_to_model, model_to_dict
 
 
