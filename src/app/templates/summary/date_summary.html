@@ -13,6 +13,7 @@
         <h1>Date {{ date_str }}</h1>
         <div id="date_summary" v-html="show_date_summary()"></div>
         <div id="time_range" ref="time_range"></div>
+        <div id="category_tree" ref="category_tree"></div>
 
         <table class="intervals">
             <thead>
@@ -43,6 +44,7 @@
 <script src="static/script/utils/api.js"></script>
 <script src="static/script/utils/utils.js"></script>
 <script src="static/script/chart/gantt_chart.js"></script>
+<script src="static/script/chart/tree_chart.js"></script>
 <script>
     let app = new Vue({
         el: '#app',
@@ -52,16 +54,24 @@
             types: [],
             logs: [],
         },
+        computed: {
+            date_range: function() {
+                return {
+                    start: new Date(this.date_str).setHours(0, 0, 0, 0),
+                    end: new Date(this.date_str).setHours(24, 0, 0, 0),
+                }
+            }
+        },
         methods: {
             show_date_summary: function() {
                 this.date_summary = synreq(DATE_SUMMARY_API(this.date_str));
                 return this.date_summary ? this.date_summary : "<p>No summary</p>";
             },
             draw_gantt: function() {
-                let date_start = new Date(this.date_str).setHours(0, 0, 0, 0);
-                let date_end = date_start + 86400 * 1000;
-                let date_range = {start: date_start, end: date_end};
-                this.time_range_chart.setOption(create_date_gantt_option(this.logs, this.types, date_range));
+                this.time_range_chart.setOption(create_date_gantt_option(this.logs, this.types, this.date_range));
+            },
+            draw_category_tree: function() {
+                this.category_tree.setOption(get_tree_chart(this.logs, this.types, this.date_range));
             }
         },
         filters: {
@@ -87,11 +97,11 @@
         },
         mounted: function() {
             this.time_range_chart = echarts.init(this.$refs.time_range);
+            this.category_tree = echarts.init(this.$refs.category_tree);
             let promise_types = req(LOG_TYPE_API());
             let promise_logs = req(LOG_DATE_API(this.date_str));
             Promise.all([promise_types, promise_logs]).then(res => {
                 let [types, logs] = res;
-                console.log(logs);
                 this.types = add_paths(types);
                 this.logs = Object.values(logs);
                 this.logs.forEach(log => {
@@ -100,8 +110,8 @@
                     log.end = new Date(log.end.replaceAll('-', '/'));
                 })
                 this.logs.sort((log1, log2) => log1.start - log2.start);
-                console.log(this.logs);
                 this.draw_gantt();
+                this.draw_category_tree();
             });
         }
     });

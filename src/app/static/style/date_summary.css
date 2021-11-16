@@ -9,6 +9,11 @@ body {
     height: 420px;
 }
 
+#category_tree {
+    width: 100%;
+    height: 800px;
+}
+
 .intervals {
     width: 80%;
     margin: auto;
