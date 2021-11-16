@@ -29,6 +29,11 @@ def date_logs(date_str):
     date_start, date_end = date_str2date_range(date_str)
     query = Log.select().where((Log.start < date_end) & (Log.end > date_start))
     logs = models_to_dict(query)
+    for id in logs:
+        if datetime.fromisoformat(logs[id]['start']) < date_start:
+            logs[id]['start'] = str(date_start)
+        if datetime.fromisoformat(logs[id]['end']) > date_end:
+            logs[id]['end'] = str(date_end)
     return jsonify(logs)
 
 
