@@ -49,7 +49,7 @@ function generate_date_intervals_gantt_option(logs, types, range){
             */
         },    
     }
-    date_intervals_gantt_option.title.text = `Intervals in ${date_format(range.start)}`
+    // date_intervals_gantt_option.title.text = `Intervals in ${date_format(range.start)}`
 
     return date_intervals_gantt_option;
 }
@@ -107,10 +107,10 @@ function generate_gantt_option(logs, types) {
                 return `${log.marker}${log.name}: ${start_clock}~${end_clock} (${duration_string})`;
             }
         },
-        title: {
-            text: 'Intervals',
-            left: 'center'
-        },
+        // title: {
+        //     text: 'Intervals',
+        //     left: 'center'
+        // },
         dataZoom: [{
             type: 'slider',
             filterMode: 'weakFilter',
