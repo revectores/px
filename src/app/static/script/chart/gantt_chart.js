@@ -1,10 +1,10 @@
-function renderItem(params, api) {
-    var categoryIndex = api.value(0);
-    var start = api.coord([api.value(1), categoryIndex]);
-    var end = api.coord([api.value(2), categoryIndex]);
-    var height = api.size([0, 1])[1] * 0.6;
+function render_item(params, api) {
+    let category_index = api.value(0);
+    let start = api.coord([api.value(1), category_index]);
+    let end = api.coord([api.value(2), category_index]);
+    let height = api.size([0, 1])[1] * 0.6;
 
-    var rectShape = echarts.graphic.clipRectByRect({
+    let shape = echarts.graphic.clipRectByRect({
         x: start[0],
         y: start[1] - height / 2,
         width: end[0] - start[0],
@@ -16,9 +16,9 @@ function renderItem(params, api) {
         height: params.coordSys.height
     });
 
-    return rectShape && {
+    return shape && {
         type: 'rect',
-        shape: rectShape,
+        shape: shape,
         style: api.style()
     };
 }
@@ -29,14 +29,9 @@ function extract_top_typeid(type_path){
 }
 
 
-function get_top_types(types){
-}
-
-
-
-function generate_date_intervals_gantt_option(logs, types, range){
-    var date_intervals_gantt_option = generate_gantt_option(logs, types);
-    date_intervals_gantt_option.xAxis = {
+function create_date_gantt_option(logs, types, range){
+    let date_gantt_option = create_gantt_option(logs, types);
+    date_gantt_option.xAxis = {
         min: range.start,
         max: range.end,
         type: 'time',
@@ -51,15 +46,13 @@ function generate_date_intervals_gantt_option(logs, types, range){
     }
     // date_intervals_gantt_option.title.text = `Intervals in ${date_format(range.start)}`
 
-    return date_intervals_gantt_option;
+    return date_gantt_option;
 }
 
 
-function generate_gantt_option(logs, types) {
-    data = [];
-    types_arr = Object.values(types);
-    console.log(types);
-    console.log(types_arr);
+function create_gantt_option(logs, types) {
+    let data = [];
+    let types_arr = Object.values(types);
     let top_names = [];
     let typeid2seq = {}
     let y_seq = 0;
@@ -70,20 +63,19 @@ function generate_gantt_option(logs, types) {
             y_seq += 1;
         }
     }
-    console.log(top_names);
-    console.log(typeid2seq);
 
     logs.forEach(function(log){
-        type = types[log.type];
-        top_typeid = extract_top_typeid(type.type_path);
+        let type = types[log.type];
+        let top_typeid = extract_top_typeid(type.type_path);
+        let top_typename = typeid2seq[top_typeid];
 
         data.push({
-            name:       type.name_path,
-            comment:    log.comment,
+            name: type.name_path,
+            comment: log.comment,
             value: [
-                typeid2seq[top_typeid],
-                new Date(log.start.replaceAll('-', '/')),
-                new Date(log.end.replaceAll('-', '/')),
+                top_typename,
+                log.start,
+                log.end,
             ],
             itemStyle: {
                 normal: {
@@ -96,14 +88,11 @@ function generate_gantt_option(logs, types) {
     option = {
         tooltip: {
             formatter: function (log){
-                log.start = log.value[1];
-                log.end   = log.value[2];
-
-                let total_seconds   = (log.end - log.start) / 1000;
+                [_, log.start, log.end] = log.value;
+                let total_seconds = (log.end - log.start) / 1000;
                 let duration_string = seconds_to_hms(total_seconds);
-                let start_clock     = log.start.toLocaleTimeString('en-GB');
-                let end_clock       = log.end.toLocaleTimeString('en-GB');
-
+                let start_clock = log.start.toLocaleTimeString('en-GB');
+                let end_clock = log.end.toLocaleTimeString('en-GB');
                 return `${log.marker}${log.name}: ${start_clock}~${end_clock} (${duration_string})`;
             }
         },
@@ -140,7 +129,7 @@ function generate_gantt_option(logs, types) {
         },
         series: [{
             type: 'custom',
-            renderItem: renderItem,
+            renderItem: render_item,
             itemStyle: {
                 opacity: 0.8
             },

@@ -48,8 +48,8 @@ function add_type_path(types){
 }
 
 
-
-function add_type_name_path(types){
+function add_paths(types){
+    types = add_type_path(types);
     for (let [typeid, type] of Object.entries(types)) {
         name_path = '';
         type.type_path.split('/').forEach((id) => {
