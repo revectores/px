@@ -82,8 +82,8 @@ function generate_gantt_option(logs, types) {
             comment:    log.comment,
             value: [
                 typeid2seq[top_typeid],
-                new Date(log.start),
-                new Date(log.end),
+                new Date(log.start.replaceAll('-', '/')),
+                new Date(log.end.replaceAll('-', '/')),
             ],
             itemStyle: {
                 normal: {
