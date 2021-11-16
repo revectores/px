@@ -27,10 +27,8 @@ def get_log_types():
 @log_api.route('/date/<date_str>')
 def date_logs(date_str):
     date_start, date_end = date_str2date_range(date_str)
-
-    query = Log.select().where((Log.start > date_start) & (Log.end < date_end))
+    query = Log.select().where((Log.start < date_end) & (Log.end > date_start))
     logs = models_to_dict(query)
-
     return jsonify(logs)
 
 
