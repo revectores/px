@@ -30,11 +30,6 @@ function extract_top_typeid(type_path){
 
 
 function get_top_types(types){
-    types_arr = Object.values(types);
-    top_type_names = types_arr.filter(type => type.depth === 1).map(type => type.name);
-    console.log(top_type_names);
-
-    return top_type_names;
 }
 
 
@@ -62,7 +57,21 @@ function generate_date_intervals_gantt_option(logs, types, range){
 
 function generate_gantt_option(logs, types) {
     data = [];
-    const top_type_names = get_top_types(types);
+    types_arr = Object.values(types);
+    console.log(types);
+    console.log(types_arr);
+    let top_names = [];
+    let typeid2seq = {}
+    let y_seq = 0;
+    for (const tid in types) {
+        if (types[tid].depth === 1) {
+            top_names.push(types[tid].name);
+            typeid2seq[tid] = y_seq;
+            y_seq += 1;
+        }
+    }
+    console.log(top_names);
+    console.log(typeid2seq);
 
     logs.forEach(function(log){
         type = types[log.type];
@@ -72,7 +81,7 @@ function generate_gantt_option(logs, types) {
             name:       type.name_path,
             comment:    log.comment,
             value: [
-                top_typeid - 1,
+                typeid2seq[top_typeid],
                 new Date(log.start),
                 new Date(log.end),
             ],
@@ -127,7 +136,7 @@ function generate_gantt_option(logs, types) {
             height: 300
         },
         yAxis: {
-            data: top_type_names
+            data: top_names
         },
         series: [{
             type: 'custom',

@@ -1,11 +1,5 @@
-import json
 import peewee
 from enum import Enum
-from playhouse.shortcuts import dict_to_model, model_to_dict
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
-
-from pprint import pprint
 from config import Config
 
 db = peewee.SqliteDatabase(Config.SQLITE3_DATABASE_PATH)
@@ -32,10 +26,10 @@ class SummaryType(Enum):
 
 
 class LogType(peewee.Model):
-    id       = peewee.IntegerField(primary_key=True)
+    id       = peewee.FixedCharField(36, primary_key=True)
     name     = peewee.CharField()
+    parent   = peewee.FixedCharField(36, null=True)
     depth    = peewee.IntegerField()
-    parent   = peewee.IntegerField()
     color    = peewee.CharField()
 
     class Meta:
@@ -43,12 +37,11 @@ class LogType(peewee.Model):
 
 
 class Log(peewee.Model):
-    id       = peewee.IntegerField(primary_key=True)
+    id       = peewee.FixedCharField(36, primary_key=True)
     start    = peewee.DateTimeField()
     end      = peewee.DateTimeField()
-    type     = peewee.IntegerField()
-    reported = peewee.BooleanField()
-    report   = peewee.CharField()
+    type     = peewee.FixedCharField(36)
+    comment  = peewee.CharField()
 
     class Meta:
         database = db
@@ -72,31 +65,3 @@ class Project(peewee.Model):
 
     class Meta:
         database = db
-
-
-if __name__ == '__main__':
-
-    MODELS = [LogType, Log, Summary, Project]
-    db.drop_tables(MODELS)
-    db.create_tables(MODELS)
-    types = json.load(open('db/init/type.json'))
-    
-    logs  = json.load(open('db/init/log.json'))
-    for log in logs:
-        log['start'] = datetime.fromtimestamp(log['start']).replace(tzinfo=ZoneInfo('Asia/Shanghai'))
-        log['end'] = datetime.fromtimestamp(log['end']).replace(tzinfo=ZoneInfo('Asia/Shanghai'))
-
-    summaries = json.load(open('db/init/summary.json'))
-    for summary in summaries:
-        summary['start'] = datetime.fromtimestamp(summary['start']).replace(tzinfo=ZoneInfo('Asia/Shanghai'))
-        summary['end'] = datetime.fromtimestamp(summary['end']).replace(tzinfo=ZoneInfo('Asia/Shanghai'))
-
-    LogType.insert_many(types).execute()
-    Log.insert_many(logs).execute()
-    Summary.insert_many(summaries).execute()
-
-    # for log_type in types:
-    #     print(log_type)
-    #     dict_to_model(LogType, log_type).save(force_insert=True)
-
-
