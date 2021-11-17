@@ -57,7 +57,7 @@ function create_gantt_option(logs, types) {
     let typeid2seq = {}
     let y_seq = 0;
     for (const tid in types) {
-        if (types[tid].depth === 1) {
+        if (types[tid].parent === null) {
             top_names.push(types[tid].name);
             typeid2seq[tid] = y_seq;
             y_seq += 1;

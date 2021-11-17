@@ -17,7 +17,6 @@ class LogType(peewee.Model):
     id       = peewee.FixedCharField(36, primary_key=True)
     name     = peewee.CharField()
     parent   = peewee.FixedCharField(36, null=True)
-    depth    = peewee.IntegerField()
     color    = peewee.CharField()
 
     class Meta:
