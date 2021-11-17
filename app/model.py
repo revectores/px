@@ -5,18 +5,6 @@ from config import Config
 db = peewee.SqliteDatabase(Config.SQLITE3_DATABASE_PATH)
 
 
-"""
-class LogType(Enum):
-    MANAGEMENT = 0
-    SKILLS     = 1
-    DEVELOP    = 2
-    HEALTH     = 3
-    NETWORKING = 4
-    ROUTINES   = 5
-    ENTERTAIN  = 6
-"""
-
-
 class SummaryType(Enum):
     RANGE    = 0
     DATE     = 1
