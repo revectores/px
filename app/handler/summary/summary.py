@@ -1,9 +1,10 @@
 from datetime import date, datetime, timedelta, timezone
 
 from flask import Blueprint, render_template, send_from_directory, jsonify
+from playhouse.shortcuts import dict_to_model, model_to_dict
+from app.config import Config
 from app.model import LogType, Log, Summary
 from app.utils import models_to_dict, date_str2date_range
-from playhouse.shortcuts import dict_to_model, model_to_dict
 
 
 
@@ -13,7 +14,7 @@ summary_api = Blueprint('summary_api', __name__)
 
 @summary.route('/date/<summary_date_str>')
 def html_date_summary(summary_date_str):
-    return send_from_directory('templates/summary/', 'date_summary.html')
+    return send_from_directory(Config.FRONTEND_PATH, 'date_summary.html')
 
 
 

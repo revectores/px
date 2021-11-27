@@ -1,6 +1,6 @@
 import peewee
 from enum import Enum
-from config import Config
+from app.config import Config
 
 db = peewee.SqliteDatabase(Config.SQLITE3_DATABASE_PATH)
 
