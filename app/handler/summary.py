@@ -6,16 +6,13 @@ from app.config import Config
 from app.model import LogType, Log, Summary
 from app.utils import models_to_dict, date_str2date_range
 
-
-
-summary     = Blueprint('summary', __name__)
+summary = Blueprint('summary', __name__)
 summary_api = Blueprint('summary_api', __name__)
 
 
 @summary.route('/date/<summary_date_str>')
 def html_date_summary(summary_date_str):
     return send_from_directory(Config.FRONTEND_PATH, 'date_summary.html')
-
 
 
 @summary_api.route('/date/<summary_date_str>')

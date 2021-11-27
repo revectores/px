@@ -1,16 +1,10 @@
-from zoneinfo import ZoneInfo
-from datetime import datetime, timedelta, timezone
-from flask import render_template, redirect
-from playhouse.shortcuts import dict_to_model, model_to_dict
+from datetime import datetime
+from flask import jsonify, Blueprint
 
-from flask import Blueprint, render_template, send_from_directory, jsonify
 from app.model import LogType, Log
 from app.utils import models_to_dict, date_str2date_range
 
-from pprint import pprint
-
-
-log     = Blueprint('log', __name__)
+log = Blueprint('log', __name__)
 log_api = Blueprint('log_api', __name__)
 
 
@@ -18,10 +12,6 @@ log_api = Blueprint('log_api', __name__)
 def get_log_types():
     log_types = LogType.select()
     return jsonify(models_to_dict(log_types))
-
-
-# @log_api.route('/range/<start>/<end>')
-
 
 
 @log_api.route('/date/<date_str>')
@@ -35,10 +25,3 @@ def date_logs(date_str):
         if datetime.fromisoformat(logs[id]['end']) > date_end:
             logs[id]['end'] = str(date_end)
     return jsonify(logs)
-
-
-
-@log_api.route('/week/<week_index>')
-def week_logs(week_index):
-    pass
-
